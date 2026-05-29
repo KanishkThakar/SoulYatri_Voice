@@ -25,6 +25,9 @@ out/
 *.swp
 *.swo
 
+# Kiro MCP settings (contains API tokens)
+.kiro/settings/mcp.json
+
 # OS
 .DS_Store
 Thumbs.db
