@@ -1,0 +1,40 @@
+
+services:
+  # ---------------------------------------------------------------------------
+  # LiveKit Server — WebRTC signaling and media relay
+  # ---------------------------------------------------------------------------
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: soulyatri-livekit
+    ports:
+      - "7880:7880"   # HTTP / WebSocket signaling
+      - "7881:7881"   # RTC TCP
+      - "7882:7882/udp"  # RTC UDP (WebRTC media)
+    environment:
+      LIVEKIT_KEYS: "devkey: secret"
+    command: --dev --bind 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - soulyatri
+
+  # ---------------------------------------------------------------------------
+  # Redis — Session cache and hot memory (L2)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: soulyatri-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - soulyatri
+
+volumes:
+  redis_data:
+
+networks:
+  soulyatri:
+    driver: bridge

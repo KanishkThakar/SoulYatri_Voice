@@ -1,0 +1,42 @@
+# =============================================================================
+# SoulYatri Speech — Python Server Dependencies
+# =============================================================================
+
+# --- Core Framework ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-dotenv>=1.0.0
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+
+# --- LiveKit ---
+livekit>=0.17.0
+livekit-api>=0.7.0
+
+# --- Audio Processing ---
+numpy>=1.26.0
+torch>=2.4.0
+torchaudio>=2.4.0
+
+# --- VAD ---
+silero-vad>=5.1
+
+# --- STT (Speech-to-Text) ---
+faster-whisper>=1.1.0
+
+# --- TTS (Text-to-Speech) ---
+edge-tts>=6.1.0
+pydub>=0.25.1
+
+# --- LLM (Ollama client) ---
+httpx>=0.27.0
+
+# --- Logging & Monitoring ---
+structlog>=24.4.0
+prometheus-client>=0.21.0
+
+# --- Redis (session cache) ---
+redis>=5.2.0
+
+# --- Utilities ---
+aiofiles>=24.1.0
