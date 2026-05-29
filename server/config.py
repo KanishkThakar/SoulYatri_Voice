@@ -57,6 +57,48 @@ class SessionSettings(BaseSettings):
     max_conversation_history: int = 20
 
 
+class EmotionSettings(BaseSettings):
+    """Emotion extraction settings."""
+
+    model_config = SettingsConfigDict(env_prefix="EMOTION_")
+
+    model_name: str = "ehcalabres/wav2vec2-lg-xlsr-en-speech-emotion-recognition"
+    device: str = "cuda"
+    enabled: bool = True
+
+
+class SpeakerSettings(BaseSettings):
+    """Speaker embedding settings."""
+
+    model_config = SettingsConfigDict(env_prefix="SPEAKER_")
+
+    model_source: str = "speechbrain/spkrec-ecapa-voxceleb"
+    save_dir: str = "models/speaker_encoder"
+    device: str = "cuda"
+    enabled: bool = True
+
+
+class FillerSettings(BaseSettings):
+    """Filler phrase system settings."""
+
+    model_config = SettingsConfigDict(env_prefix="FILLER_")
+
+    enabled: bool = True
+    pre_synthesize: bool = True
+    phrases_path: str = ""
+
+
+class BargeInSettings(BaseSettings):
+    """Barge-in detection settings."""
+
+    model_config = SettingsConfigDict(env_prefix="BARGE_IN_")
+
+    enabled: bool = True
+    threshold: float = 0.5
+    min_speech_duration_ms: int = 200
+    cooldown_ms: int = 500
+
+
 class Settings(BaseSettings):
     """Root application settings."""
 
@@ -78,6 +120,10 @@ class Settings(BaseSettings):
     whisper: WhisperSettings = WhisperSettings()
     tts: TTSSettings = TTSSettings()
     session: SessionSettings = SessionSettings()
+    emotion: EmotionSettings = EmotionSettings()
+    speaker: SpeakerSettings = SpeakerSettings()
+    filler: FillerSettings = FillerSettings()
+    barge_in: BargeInSettings = BargeInSettings()
 
 
 # Singleton instance — import this everywhere

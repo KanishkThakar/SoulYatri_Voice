@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 from ..config import settings
 from ..utils.logging_config import get_logger
@@ -38,6 +38,12 @@ class SessionState:
     conversation_history: list[ConversationTurn] = field(default_factory=list)
     preferred_language: Optional[str] = None
     is_active: bool = True
+    turn_count_total: int = 0
+
+    # Phase 2: Emotion and speaker tracking
+    emotion_history: list[dict[str, Any]] = field(default_factory=list)
+    turn_metadata: list[dict[str, Any]] = field(default_factory=list)
+    speaker_embedding: Optional[object] = None  # np.ndarray, kept generic to avoid import
 
     def add_turn(self, role: str, content: str, language: str = "en") -> None:
         """Add a conversation turn and update activity timestamp.
@@ -56,6 +62,7 @@ class SessionState:
             )
         )
         self.last_activity = time.time()
+        self.turn_count_total += 1
 
         # Update language preference based on recent turns
         if role == "user":
@@ -65,6 +72,30 @@ class SessionState:
         max_history = settings.session.max_conversation_history
         if len(self.conversation_history) > max_history:
             self.conversation_history = self.conversation_history[-max_history:]
+
+    def add_emotion(self, emotion: Any) -> None:
+        """Record an emotion result for the current session."""
+        if emotion is None:
+            return
+
+        if hasattr(emotion, "to_dict"):
+            payload = emotion.to_dict()
+        elif isinstance(emotion, dict):
+            payload = emotion
+        else:
+            payload = {"label": getattr(emotion, "label", "neutral")}
+
+        payload["timestamp"] = time.time()
+        self.emotion_history.append(payload)
+
+    def add_turn_metadata(self, metadata: dict[str, Any]) -> None:
+        """Store a per-turn metadata bundle."""
+        if not metadata:
+            return
+
+        self.turn_metadata.append(metadata)
+        if len(self.turn_metadata) > settings.session.max_conversation_history:
+            self.turn_metadata = self.turn_metadata[-settings.session.max_conversation_history :]
 
     def get_llm_history(self) -> list[dict]:
         """Get conversation history formatted for the LLM.

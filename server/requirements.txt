@@ -40,3 +40,8 @@ redis>=5.2.0
 
 # --- Utilities ---
 aiofiles>=24.1.0
+
+# --- Phase 2: Emotion + Speaker Features ---
+transformers>=4.45.0
+speechbrain>=1.0.0
+scikit-learn>=1.5.0

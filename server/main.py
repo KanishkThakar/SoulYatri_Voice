@@ -88,7 +88,7 @@ app.add_middleware(
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "version": "0.1.0", "phase": 1}
+    return {"status": "healthy", "version": "0.1.0", "phase": 2}
 
 
 @app.get("/metrics", response_class=PlainTextResponse)
@@ -171,7 +171,12 @@ async def audio_websocket(websocket: WebSocket, session_id: str):
     client_sample_rate = SAMPLE_RATE_16K  # Default
 
     # Set up audio response callback
-    async def on_audio_response(sid: str, audio_bytes: bytes, sample_rate: int):
+    async def on_audio_response(
+        sid: str,
+        audio_bytes: bytes,
+        sample_rate: int,
+        metadata: dict | None = None,
+    ):
         """Send synthesized audio back to the client."""
         try:
             # Send audio data as binary WebSocket frame
@@ -182,6 +187,7 @@ async def audio_websocket(websocket: WebSocket, session_id: str):
                 "type": "audio_meta",
                 "sample_rate": sample_rate,
                 "size": len(audio_bytes),
+                "metadata": metadata or {},
             }))
         except Exception as e:
             logger.error("ws_send_error", error=str(e), session_id=sid)
@@ -198,8 +204,19 @@ async def audio_websocket(websocket: WebSocket, session_id: str):
         except Exception as e:
             logger.error("ws_transcript_error", error=str(e), session_id=sid)
 
+    async def on_turn_metadata(sid: str, metadata: dict):
+        """Send per-turn feature metadata to the client."""
+        try:
+            await websocket.send_text(json.dumps({
+                "type": "turn_metadata",
+                "metadata": metadata,
+            }))
+        except Exception as e:
+            logger.error("ws_turn_metadata_error", error=str(e), session_id=sid)
+
     agent.set_audio_callback(on_audio_response)
     agent.set_transcript_callback(on_transcript)
+    agent.set_turn_metadata_callback(on_turn_metadata)
 
     try:
         while True:

@@ -1,0 +1,315 @@
+{
+  "version": "1.0",
+  "description": "SoulYatri filler phrase bank for low-latency cached responses",
+  "phrases": [
+    {
+      "id": "ack_hmm_en",
+      "text": "hmm",
+      "language": "en",
+      "category": "acknowledgment",
+      "tone": "neutral",
+      "intent": "acknowledge",
+      "priority": 1,
+      "min_confidence": 0.6
+    },
+    {
+      "id": "ack_isee_en",
+      "text": "I see",
+      "language": "en",
+      "category": "acknowledgment",
+      "tone": "thoughtful",
+      "intent": "acknowledge",
+      "priority": 2,
+      "min_confidence": 0.6
+    },
+    {
+      "id": "ack_gotit_en",
+      "text": "got it",
+      "language": "en",
+      "category": "acknowledgment",
+      "tone": "casual",
+      "intent": "acknowledge",
+      "priority": 2,
+      "min_confidence": 0.6
+    },
+    {
+      "id": "ack_right_en",
+      "text": "right",
+      "language": "en",
+      "category": "acknowledgment",
+      "tone": "casual",
+      "intent": "acknowledge",
+      "priority": 1,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "ack_acha_hi",
+      "text": "acchā",
+      "language": "hi",
+      "category": "acknowledgment",
+      "tone": "neutral",
+      "intent": "acknowledge",
+      "priority": 1,
+      "min_confidence": 0.6
+    },
+    {
+      "id": "ack_haan_hi",
+      "text": "haan",
+      "language": "hi",
+      "category": "acknowledgment",
+      "tone": "casual",
+      "intent": "acknowledge",
+      "priority": 1,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "ack_samjha_hi",
+      "text": "samajh gayi",
+      "language": "hi",
+      "category": "acknowledgment",
+      "tone": "warm",
+      "intent": "acknowledge",
+      "priority": 2,
+      "min_confidence": 0.6
+    },
+    {
+      "id": "stall_onemoment_en",
+      "text": "one moment",
+      "language": "en",
+      "category": "stall",
+      "tone": "calm",
+      "intent": "stall",
+      "priority": 3,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "stall_letmethink_en",
+      "text": "let me think about that",
+      "language": "en",
+      "category": "stall",
+      "tone": "thoughtful",
+      "intent": "stall",
+      "priority": 4,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "stall_goodquestion_en",
+      "text": "that's a good question",
+      "language": "en",
+      "category": "stall",
+      "tone": "warm",
+      "intent": "stall",
+      "priority": 4,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "stall_eksecond_hi",
+      "text": "ek second",
+      "language": "hi",
+      "category": "stall",
+      "tone": "casual",
+      "intent": "stall",
+      "priority": 3,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "stall_sochne_hi",
+      "text": "sochne do",
+      "language": "hi",
+      "category": "stall",
+      "tone": "thoughtful",
+      "intent": "stall",
+      "priority": 4,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "stall_ruko_hi",
+      "text": "bas ek minute",
+      "language": "hi",
+      "category": "stall",
+      "tone": "casual",
+      "intent": "stall",
+      "priority": 3,
+      "min_confidence": 0.3
+    },
+    {
+      "id": "greet_hello_en",
+      "text": "hey there! how can I help you today?",
+      "language": "en",
+      "category": "greeting",
+      "tone": "warm",
+      "intent": "greeting",
+      "priority": 5,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "greet_hi_en",
+      "text": "hi! what's on your mind?",
+      "language": "en",
+      "category": "greeting",
+      "tone": "casual",
+      "intent": "greeting",
+      "priority": 5,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "greet_namaste_hi",
+      "text": "namaste! kaise madad kar sakti hoon?",
+      "language": "hi",
+      "category": "greeting",
+      "tone": "warm",
+      "intent": "greeting",
+      "priority": 5,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "greet_hello_hi",
+      "text": "hello! bataiye kya chahiye?",
+      "language": "hi",
+      "category": "greeting",
+      "tone": "warm",
+      "intent": "greeting",
+      "priority": 5,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "confirm_sure_en",
+      "text": "sure!",
+      "language": "en",
+      "category": "confirmation",
+      "tone": "enthusiastic",
+      "intent": "confirm",
+      "priority": 2,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "confirm_ofcourse_en",
+      "text": "of course",
+      "language": "en",
+      "category": "confirmation",
+      "tone": "warm",
+      "intent": "confirm",
+      "priority": 3,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "confirm_absolutely_en",
+      "text": "absolutely!",
+      "language": "en",
+      "category": "confirmation",
+      "tone": "enthusiastic",
+      "intent": "confirm",
+      "priority": 3,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "confirm_bilkul_hi",
+      "text": "bilkul!",
+      "language": "hi",
+      "category": "confirmation",
+      "tone": "enthusiastic",
+      "intent": "confirm",
+      "priority": 2,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "confirm_zaroor_hi",
+      "text": "zaroor!",
+      "language": "hi",
+      "category": "confirmation",
+      "tone": "warm",
+      "intent": "confirm",
+      "priority": 3,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "empathy_understand_en",
+      "text": "I understand",
+      "language": "en",
+      "category": "empathy",
+      "tone": "gentle",
+      "intent": "empathize",
+      "priority": 4,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "empathy_hearme_en",
+      "text": "I hear you",
+      "language": "en",
+      "category": "empathy",
+      "tone": "gentle",
+      "intent": "empathize",
+      "priority": 4,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "empathy_tough_en",
+      "text": "that sounds tough",
+      "language": "en",
+      "category": "empathy",
+      "tone": "compassionate",
+      "intent": "empathize",
+      "priority": 5,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "empathy_samajh_hi",
+      "text": "main samajh sakti hoon",
+      "language": "hi",
+      "category": "empathy",
+      "tone": "gentle",
+      "intent": "empathize",
+      "priority": 4,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "empathy_pata_hi",
+      "text": "mujhe pata hai yeh mushkil hai",
+      "language": "hi",
+      "category": "empathy",
+      "tone": "compassionate",
+      "intent": "empathize",
+      "priority": 5,
+      "min_confidence": 0.5
+    },
+    {
+      "id": "farewell_bye_en",
+      "text": "goodbye! take care",
+      "language": "en",
+      "category": "farewell",
+      "tone": "warm",
+      "intent": "farewell",
+      "priority": 5,
+      "min_confidence": 0.7
+    },
+    {
+      "id": "farewell_alvida_hi",
+      "text": "alvida! apna dhyaan rakhiye",
+      "language": "hi",
+      "category": "farewell",
+      "tone": "warm",
+      "intent": "farewell",
+      "priority": 5,
+      "min_confidence": 0.7
+    }
+  ],
+
+  "intent_keywords": {
+    "greeting": {
+      "en": ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "howdy", "sup", "what's up", "yo"],
+      "hi": ["namaste", "namaskar", "hello", "kaise ho", "kya haal", "kaisa hai"]
+    },
+    "farewell": {
+      "en": ["bye", "goodbye", "see you", "take care", "good night", "later", "ciao"],
+      "hi": ["alvida", "phir milenge", "tata", "bye bye", "chalta hoon", "good night"]
+    },
+    "confirmation": {
+      "en": ["yes", "yeah", "yep", "sure", "ok", "okay", "fine", "right", "correct", "absolutely", "definitely"],
+      "hi": ["haan", "ji", "theek hai", "bilkul", "zaroor", "sahi", "accha"]
+    },
+    "acknowledgment": {
+      "en": ["hmm", "uh huh", "mhm", "i see", "got it", "right", "oh", "ah"],
+      "hi": ["accha", "hmm", "haan", "theek", "samjha"]
+    }
+  }
+}

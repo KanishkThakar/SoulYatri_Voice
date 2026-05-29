@@ -1,0 +1,160 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  gap: var(--space-xl);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 var(--space-md);
+  gap: var(--space-md);
+}
+
+.titleGroup {
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.visualizerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+.ambientPulse {
+  position: absolute;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+  animation: breathe 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.statusText {
+  margin-top: var(--space-lg);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  transition: color var(--transition-normal);
+}
+
+.statusTextActive {
+  color: var(--color-text-accent);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.micButton {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.micButtonIcon {
+  position: relative;
+  z-index: 2;
+}
+
+.micRipple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: ripple 2s ease-out infinite;
+}
+
+.micRippleDelayed {
+  border-color: rgba(255, 255, 255, 0.2);
+  animation-delay: 0.5s;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-glass);
+  border: 1px solid var(--color-border);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.transcriptCard {
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+}
+
+.footer {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls {
+    width: 100%;
+  }
+
+  .micButton {
+    width: 68px;
+    height: 68px;
+  }
+}

@@ -19,6 +19,25 @@ export interface TranscriptEntry {
   timestamp: number;
 }
 
+export interface ServerTurnMetadata {
+  session_id: string;
+  turn_id: string;
+  speech_started?: boolean;
+  speech_ended?: boolean;
+  emotion?: {
+    label: string;
+    confidence: number;
+    valence: number;
+    arousal: number;
+    dominance: number;
+  } | null;
+  speaker_embedding_id?: string;
+  barge_in?: boolean;
+  language?: string;
+  duration?: number;
+  extraction_time?: number;
+}
+
 interface UseVoiceStreamOptions {
   serverUrl?: string;
   sampleRate?: number;
@@ -40,6 +59,8 @@ export function useVoiceStream(options: UseVoiceStreamOptions = {}) {
   const [isRecording, setIsRecording] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
+  const [lastAudioSource, setLastAudioSource] = useState<string | null>(null);
+  const [turnMetadata, setTurnMetadata] = useState<ServerTurnMetadata | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -135,7 +156,9 @@ export function useVoiceStream(options: UseVoiceStreamOptions = {}) {
           if (msg.type === "transcript") {
             addTranscript(msg.role, msg.text);
           } else if (msg.type === "audio_meta") {
-            // Audio metadata — used for future sync
+            setLastAudioSource(msg.metadata?.source ?? null);
+          } else if (msg.type === "turn_metadata") {
+            setTurnMetadata(msg.metadata ?? null);
           }
         } catch {
           // Ignore parse errors
@@ -296,6 +319,8 @@ export function useVoiceStream(options: UseVoiceStreamOptions = {}) {
     isRecording,
     audioLevel,
     transcripts,
+    lastAudioSource,
+    turnMetadata,
     connect,
     disconnect,
     startRecording,
