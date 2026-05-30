@@ -21,7 +21,7 @@ export default function VoiceInterface() {
     stopRecording,
     clearTranscripts,
   } = useVoiceStream({
-    serverUrl: "ws://localhost:8000/ws/audio",
+    serverUrl: "ws://localhost:8080/ws/audio",
     sampleRate: 16000,
   });
 
