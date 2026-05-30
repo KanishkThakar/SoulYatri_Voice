@@ -1,0 +1,55 @@
+# =============================================================================
+# SoulYatri — Server image (final_use.md §16C "Dockerize services, pin versions")
+# =============================================================================
+# Build context = repo root:
+#   docker build -f infra/docker/Dockerfile.server -t soulyatri-server:dev .
+#
+# Notes:
+#  * Base image is pinned by minor version + digest-friendly tag. Pin the exact digest
+#    in production (see infra/docker/PINNED_VERSIONS.md).
+#  * Python deps come from the existing server/requirements.txt (already version-bounded).
+#  * Runs as a non-root user; exposes the FastAPI app + /metrics on 8000.
+#  * CPU-friendly: torch/cuda are installed via requirements; for GPU nodes use a CUDA
+#    base image variant (documented in PINNED_VERSIONS.md) — this default is CPU-safe.
+
+FROM python:3.11-slim AS base
+
+# --- OS deps: ffmpeg for audio (pydub/edge-tts), build tools for any wheels ---
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ffmpeg \
+        build-essential \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# --- Python deps first (better layer caching) ---
+COPY server/requirements.txt /app/server/requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r /app/server/requirements.txt
+
+# --- Application code ---
+COPY server/ /app/server/
+COPY shared/ /app/shared/
+# Foundation package metadata (kept minimal; heavy installs already done above).
+COPY pyproject.toml /app/pyproject.toml
+
+# --- Non-root runtime user ---
+RUN useradd --create-home --uid 10001 soulyatri \
+    && chown -R soulyatri:soulyatri /app
+USER soulyatri
+
+EXPOSE 8000
+
+# --- Healthcheck hits the metrics endpoint (always-on, cheap) ---
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://localhost:8000/metrics > /dev/null || exit 1
+
+# uvicorn entrypoint for the FastAPI app in server/main.py
+CMD ["python", "-m", "uvicorn", "server.main:app", "--host", "0.0.0.0", "--port", "8000"]

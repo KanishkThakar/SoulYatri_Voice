@@ -1,0 +1,47 @@
+# =============================================================================
+# SoulYatri — Release / Canary policy (final_use.md §16C)
+# =============================================================================
+# Consumed by infra/deploy/rollback.py::load_release_policy(). The evaluator decides
+# rollback / hold / promote from observed canary metrics versus these thresholds.
+#
+# Metric mapping to the server's exposed /metrics (see infra/monitoring/):
+#   p95_ttfb_ms              <- soulyatri_pipeline_e2e_latency_seconds (p95, *1000)
+#   error_rate_pct           <- rate(soulyatri_errors_total) / rate(requests) * 100
+#   interruption_recovery_ms <- barge-in -> clean-stop recovery (Phase 10C)
+# All thresholds are "breach when observed exceeds the limit" unless overridden in
+# `comparisons:` below.
+
+rollout: canary
+
+# Canary stage sizing + evidence requirement before promotion.
+canary:
+  percent: 10          # send 10% of traffic to the new version first
+  min_samples: 200     # require >= 200 canary samples before a 'promote' verdict
+
+# Hard rollback triggers — matches the §16C skeleton, with extra guards added.
+rollback_trigger:
+  p95_ttfb_ms: 450             # time-to-first-byte/audible p95 ceiling (ms)
+  p99_ttfb_ms: 900             # p99 ceiling (ms)
+  error_rate_pct: 1.0          # max tolerated error rate (percent)
+  interruption_recovery_ms: 350  # barge-in clean-stop budget (ms)
+
+# Optional per-metric comparison overrides (default is greater_than for all above).
+# Example: a *minimum* filler hit rate would breach when it drops below the limit.
+comparisons:
+  p95_ttfb_ms: greater_than
+  error_rate_pct: greater_than
+
+# -----------------------------------------------------------------------------
+# Rollout stages (documentation of the canary progression; rollback.py reads the
+# thresholds above, while these stages document the human/automation runbook order).
+# -----------------------------------------------------------------------------
+stages:
+  - name: canary
+    traffic_percent: 10
+    bake_minutes: 15
+  - name: ramp
+    traffic_percent: 50
+    bake_minutes: 30
+  - name: full
+    traffic_percent: 100
+    bake_minutes: 0

@@ -1,0 +1,28 @@
+{
+  "scenario_id": "distress",
+  "category": "distress",
+  "language": "en",
+  "description": "Emotionally distressed user; empathetic full-stack route, never filler.",
+  "turns": [
+    {
+      "transcript": "I'm feeling really overwhelmed and I don't know what to do.",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "emotional_support",
+      "expected_emotion": "distress",
+      "is_distress": true,
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 230, "first_token_ms": 140, "turn_end_detection_delay_ms": 100}
+    },
+    {
+      "transcript": "Sab kuch bahut mushkil lag raha hai aaj.",
+      "language": "hinglish",
+      "expected_route": "full_stack",
+      "expected_intent": "emotional_support",
+      "expected_emotion": "distress",
+      "is_distress": true,
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 245, "first_token_ms": 150, "turn_end_detection_delay_ms": 110}
+    }
+  ]
+}

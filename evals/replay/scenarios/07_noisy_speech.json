@@ -1,0 +1,28 @@
+{
+  "scenario_id": "noisy_speech",
+  "category": "noisy",
+  "description": "Noisy-channel speech; full-stack with degraded turn-end detection.",
+  "language": "en",
+  "turns": [
+    {
+      "transcript": "Can you... uh... repeat that please?",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "clarify",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "noisy": true,
+      "timing": {"time_to_first_audible_ms": 295, "first_token_ms": 205, "turn_end_detection_delay_ms": 145}
+    },
+    {
+      "transcript": "Background hai bahut, par main sun raha hoon.",
+      "language": "hinglish",
+      "expected_route": "full_stack",
+      "expected_intent": "statement",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "noisy": true,
+      "timing": {"time_to_first_audible_ms": 298, "first_token_ms": 210, "turn_end_detection_delay_ms": 148}
+    }
+  ]
+}

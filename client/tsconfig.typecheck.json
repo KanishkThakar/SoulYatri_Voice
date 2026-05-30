@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": []
+  },
+  "include": [
+    "src/audio/types.ts",
+    "src/audio/capture.ts",
+    "src/audio/webrtc.ts",
+    "src/audio/session.ts",
+    "src/audio/index.ts",
+    "src/playback/stream_player.ts",
+    "src/playback/index.ts",
+    "src/router/phrase_schema.ts",
+    "src/router/intent_router.ts",
+    "src/router/filler_engine.ts",
+    "src/router/index.ts"
+  ]
+}

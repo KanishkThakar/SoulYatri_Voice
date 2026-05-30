@@ -1,0 +1,36 @@
+{
+  "description": "Audio intelligibility (WER) + naturalness-proxy fixtures (final_use.md §12).",
+  "wer_samples": [
+    {
+      "reference": "can you help me plan my week",
+      "hypothesis": "can you help me plan my week",
+      "language": "en"
+    },
+    {
+      "reference": "please set a reminder for tomorrow",
+      "hypothesis": "please set a reminder for tomorow",
+      "language": "en"
+    },
+    {
+      "reference": "mujhe kal ka plan banana hai",
+      "hypothesis": "mujhe kal ka plan banana hai",
+      "language": "hinglish"
+    }
+  ],
+  "naturalness_samples": [
+    {
+      "clipping_ratio": 0.0,
+      "join_discontinuity": 0.02,
+      "pace_deviation": 0.05,
+      "repeated_artifact_ratio": 0.0,
+      "silence_ratio": 0.03
+    },
+    {
+      "clipping_ratio": 0.01,
+      "join_discontinuity": 0.04,
+      "pace_deviation": 0.10,
+      "repeated_artifact_ratio": 0.0,
+      "silence_ratio": 0.05
+    }
+  ]
+}

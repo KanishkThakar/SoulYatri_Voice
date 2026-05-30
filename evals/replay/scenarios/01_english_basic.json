@@ -1,0 +1,26 @@
+{
+  "scenario_id": "english_basic",
+  "category": "english",
+  "language": "en",
+  "description": "Plain English multi-turn conversation; full-stack routing.",
+  "turns": [
+    {
+      "transcript": "Hello, can you help me plan my week?",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "request",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 240, "first_token_ms": 150, "turn_end_detection_delay_ms": 90}
+    },
+    {
+      "transcript": "What is the weather like tomorrow?",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "question",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 260, "first_token_ms": 170, "turn_end_detection_delay_ms": 100}
+    }
+  ]
+}
