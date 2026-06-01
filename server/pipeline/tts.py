@@ -7,7 +7,10 @@ for voice selection, and MP3-to-PCM conversion for LiveKit output.
 
 from __future__ import annotations
 
+import glob
 import io
+import os
+import shutil
 import time
 from dataclasses import dataclass
 from typing import AsyncGenerator, Optional
@@ -19,6 +22,67 @@ from ..utils.logging_config import get_logger
 from ..utils.metrics import tts_latency, tts_requests, errors_total
 
 logger = get_logger(__name__)
+
+
+def _ensure_ffmpeg_available() -> bool:
+    """Locate ffmpeg/ffprobe and configure pydub to use them.
+
+    pydub shells out to ffmpeg/ffprobe to decode edge-tts MP3 output. On
+    Windows the binaries may be installed (e.g. via winget) but not yet on the
+    PATH of the running process. This resolves them explicitly so MP3->PCM
+    conversion works regardless of how the server was launched.
+
+    Returns:
+        True if ffmpeg was found and configured, False otherwise.
+    """
+    ffmpeg = shutil.which("ffmpeg")
+    ffprobe = shutil.which("ffprobe")
+
+    # Fall back to common install locations if not on PATH.
+    if not ffmpeg or not ffprobe:
+        search_globs = [
+            os.path.expandvars(
+                r"%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\**\bin"
+            ),
+            os.path.expandvars(r"%LOCALAPPDATA%\Programs\ffmpeg*\bin"),
+            r"C:\ffmpeg\bin",
+            r"C:\Program Files\ffmpeg\bin",
+        ]
+        for pattern in search_globs:
+            for bin_dir in glob.glob(pattern, recursive=True):
+                cand_ffmpeg = os.path.join(bin_dir, "ffmpeg.exe")
+                cand_ffprobe = os.path.join(bin_dir, "ffprobe.exe")
+                if os.path.isfile(cand_ffmpeg) and os.path.isfile(cand_ffprobe):
+                    ffmpeg = ffmpeg or cand_ffmpeg
+                    ffprobe = ffprobe or cand_ffprobe
+                    # Make them discoverable to pydub's own PATH-based lookups.
+                    os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+                    break
+            if ffmpeg and ffprobe:
+                break
+
+    if ffmpeg and ffprobe:
+        try:
+            from pydub import AudioSegment
+
+            AudioSegment.converter = ffmpeg
+            AudioSegment.ffmpeg = ffmpeg
+            AudioSegment.ffprobe = ffprobe
+        except Exception as e:  # pragma: no cover - defensive
+            logger.warning("pydub_ffmpeg_config_failed", error=str(e))
+            return False
+        logger.info("ffmpeg_configured", ffmpeg=ffmpeg, ffprobe=ffprobe)
+        return True
+
+    logger.error(
+        "ffmpeg_not_found",
+        hint="Install ffmpeg (winget install Gyan.FFmpeg) so TTS can decode audio.",
+    )
+    return False
+
+
+# Configure ffmpeg for pydub as soon as this module is imported.
+_FFMPEG_OK = _ensure_ffmpeg_available()
 
 
 @dataclass

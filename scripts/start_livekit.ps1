@@ -1,5 +1,5 @@
 # =============================================================================
-# SoulYatri Speech — Start LiveKit Server
+# SoulYatri Speech - Start LiveKit Server
 # =============================================================================
 # Starts the LiveKit server via Docker for local development.
 # Usage: .\scripts\start_livekit.ps1
@@ -23,7 +23,7 @@ while ($retryCount -lt $maxRetries) {
         $response = Invoke-WebRequest -Uri "http://localhost:7880" -TimeoutSec 2 -ErrorAction SilentlyContinue
         if ($response.StatusCode -eq 200 -or $response.StatusCode -eq 404) {
             Write-Host ""
-            Write-Host "✓ LiveKit Server is ready!" -ForegroundColor Green
+            Write-Host "[OK] LiveKit Server is ready!" -ForegroundColor Green
             Write-Host ""
             Write-Host "Connection Info:" -ForegroundColor Yellow
             Write-Host "  URL:        ws://localhost:7880" -ForegroundColor White
@@ -43,6 +43,6 @@ while ($retryCount -lt $maxRetries) {
 }
 
 Write-Host ""
-Write-Host "✗ LiveKit failed to start. Check Docker logs:" -ForegroundColor Red
+Write-Host "[X] LiveKit failed to start. Check Docker logs:" -ForegroundColor Red
 Write-Host "  docker-compose logs livekit" -ForegroundColor White
 Write-Host ""

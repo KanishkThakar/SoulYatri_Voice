@@ -1,5 +1,5 @@
 # =============================================================================
-# SoulYatri Speech — Setup Script (Windows PowerShell)
+# SoulYatri Speech - Setup Script (Windows PowerShell)
 # =============================================================================
 # Run this script to set up the development environment.
 # Usage: .\scripts\setup.ps1
@@ -7,7 +7,7 @@
 
 Write-Host ""
 Write-Host "=======================================" -ForegroundColor Cyan
-Write-Host "  SoulYatri Speech — Setup" -ForegroundColor Cyan
+Write-Host "  SoulYatri Speech - Setup" -ForegroundColor Cyan
 Write-Host "=======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -15,9 +15,9 @@ Write-Host ""
 Write-Host "[1/6] Checking Python..." -ForegroundColor Yellow
 try {
     $pythonVersion = python --version 2>&1
-    Write-Host "  ✓ $pythonVersion" -ForegroundColor Green
+    Write-Host "  [OK] $pythonVersion" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Python not found. Install Python 3.10+ from https://python.org" -ForegroundColor Red
+    Write-Host "  [X] Python not found. Install Python 3.10+ from https://python.org" -ForegroundColor Red
     exit 1
 }
 
@@ -25,9 +25,9 @@ try {
 Write-Host "[2/6] Checking Node.js..." -ForegroundColor Yellow
 try {
     $nodeVersion = node --version 2>&1
-    Write-Host "  ✓ Node.js $nodeVersion" -ForegroundColor Green
+    Write-Host "  [OK] Node.js $nodeVersion" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Node.js not found. Install Node.js 18+ from https://nodejs.org" -ForegroundColor Red
+    Write-Host "  [X] Node.js not found. Install Node.js 18+ from https://nodejs.org" -ForegroundColor Red
     exit 1
 }
 
@@ -35,9 +35,9 @@ try {
 Write-Host "[3/6] Checking Docker..." -ForegroundColor Yellow
 try {
     $dockerVersion = docker --version 2>&1
-    Write-Host "  ✓ $dockerVersion" -ForegroundColor Green
+    Write-Host "  [OK] $dockerVersion" -ForegroundColor Green
 } catch {
-    Write-Host "  ✗ Docker not found. Install Docker Desktop from https://docker.com" -ForegroundColor Red
+    Write-Host "  [X] Docker not found. Install Docker Desktop from https://docker.com" -ForegroundColor Red
     exit 1
 }
 
@@ -45,10 +45,10 @@ try {
 Write-Host "[4/6] Checking Ollama..." -ForegroundColor Yellow
 try {
     $ollamaVersion = ollama --version 2>&1
-    Write-Host "  ✓ Ollama $ollamaVersion" -ForegroundColor Green
+    Write-Host "  [OK] Ollama $ollamaVersion" -ForegroundColor Green
 } catch {
-    Write-Host "  ⚠ Ollama not found. Install from https://ollama.com" -ForegroundColor Yellow
-    Write-Host "    You can install it later, but the LLM pipeline won't work without it." -ForegroundColor Yellow
+    Write-Host "  [!] Ollama not found. Install from https://ollama.com" -ForegroundColor Yellow
+    Write-Host "      You can install it later, but the LLM pipeline won't work without it." -ForegroundColor Yellow
 }
 
 # --- Set up Python virtual environment ---
@@ -59,16 +59,16 @@ $venvPath = "server\venv"
 if (-not (Test-Path $venvPath)) {
     Write-Host "  Creating virtual environment..." -ForegroundColor Gray
     python -m venv $venvPath
-    Write-Host "  ✓ Virtual environment created at $venvPath" -ForegroundColor Green
+    Write-Host "  [OK] Virtual environment created at $venvPath" -ForegroundColor Green
 } else {
-    Write-Host "  ✓ Virtual environment already exists" -ForegroundColor Green
+    Write-Host "  [OK] Virtual environment already exists" -ForegroundColor Green
 }
 
-# Activate and install dependencies
+# Install dependencies (use `python -m pip` so pip can upgrade itself on Windows)
 Write-Host "  Installing Python dependencies..." -ForegroundColor Gray
-& "$venvPath\Scripts\pip.exe" install --upgrade pip --quiet
-& "$venvPath\Scripts\pip.exe" install -r server\requirements.txt --quiet
-Write-Host "  ✓ Python dependencies installed" -ForegroundColor Green
+& "$venvPath\Scripts\python.exe" -m pip install --upgrade pip --quiet
+& "$venvPath\Scripts\python.exe" -m pip install -r server\requirements.txt --quiet
+Write-Host "  [OK] Python dependencies installed" -ForegroundColor Green
 
 # --- Set up Node.js client ---
 Write-Host ""
@@ -78,16 +78,16 @@ if (Test-Path "client\package.json") {
     Push-Location client
     npm install --quiet
     Pop-Location
-    Write-Host "  ✓ Node.js dependencies installed" -ForegroundColor Green
+    Write-Host "  [OK] Node.js dependencies installed" -ForegroundColor Green
 } else {
-    Write-Host "  ⚠ Client not found. Run 'npx create-next-app@latest ./client' first" -ForegroundColor Yellow
+    Write-Host "  [!] Client not found. Run 'npx create-next-app@latest ./client' first" -ForegroundColor Yellow
 }
 
 # --- Create .env if not exists ---
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"
     Write-Host ""
-    Write-Host "  ✓ Created .env from .env.example — review and update as needed" -ForegroundColor Green
+    Write-Host "  [OK] Created .env from .env.example - review and update as needed" -ForegroundColor Green
 }
 
 # --- Summary ---
