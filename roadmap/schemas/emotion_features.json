@@ -1,0 +1,47 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "EmotionFeatures",
+  "description": "Speech-emotion features (roadmap/models/runtime.py: EmotionFeatures).",
+  "type": "object",
+  "required": [
+    "label",
+    "confidence",
+    "valence",
+    "arousal",
+    "dominance",
+    "extraction_ok"
+  ],
+  "properties": {
+    "label": {
+      "type": ["string", "null"],
+      "description": "One of the 7 emotion tags, or null if extraction failed."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Confidence in 0..1."
+    },
+    "valence": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "description": "V/A/D bound [-1.0, 1.0] (Requirement 6.1)."
+    },
+    "arousal": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "description": "V/A/D bound [-1.0, 1.0] (Requirement 6.1)."
+    },
+    "dominance": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0,
+      "description": "V/A/D bound [-1.0, 1.0] (Requirement 6.1)."
+    },
+    "extraction_ok": {
+      "type": "boolean"
+    }
+  }
+}

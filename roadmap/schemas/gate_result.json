@@ -1,0 +1,63 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "GateResult",
+  "description": "The aggregate result of evaluating a gate (roadmap/models/selection.py: GateResult).",
+  "type": "object",
+  "required": [
+    "gate_id",
+    "criteria_results",
+    "overall_passed",
+    "blocked",
+    "remediation"
+  ],
+  "properties": {
+    "gate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "criteria_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/criterion_result"
+      }
+    },
+    "overall_passed": {
+      "type": "boolean"
+    },
+    "blocked": {
+      "type": "boolean"
+    },
+    "remediation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "One entry per failing criterion when blocked (Requirements 8.4, 8.5)."
+    }
+  },
+  "$defs": {
+    "criterion_result": {
+      "type": "object",
+      "required": ["metric_name", "measured", "threshold", "operator", "passed"],
+      "properties": {
+        "metric_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measured": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["<=", "<", ">=", ">", "=="]
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

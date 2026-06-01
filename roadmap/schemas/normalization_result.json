@@ -1,0 +1,19 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "NormalizationResult",
+  "description": "The result of Hinglish transliteration normalization (roadmap/models/runtime.py: NormalizationResult).",
+  "type": "object",
+  "required": ["normalized_text", "unmapped_tokens"],
+  "properties": {
+    "normalized_text": {
+      "type": "string"
+    },
+    "unmapped_tokens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tokens with no mapping entry, retained unchanged and flagged (Requirement 5.8)."
+    }
+  }
+}

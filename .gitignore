@@ -43,5 +43,9 @@ logs/
 # Models (downloaded locally)
 models/
 
+# Bundled third-party binaries (exceed GitHub's 100MB limit; install locally)
+server/bin/
+*.exe
+
 # Docker
 docker-compose.override.yml

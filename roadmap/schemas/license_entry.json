@@ -1,0 +1,42 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "LicenseEntry",
+  "description": "A licensing record for an adopted component (roadmap/models/runtime.py: LicenseEntry).",
+  "type": "object",
+  "required": [
+    "component_name",
+    "license_id",
+    "constraints",
+    "intended_use_permitted",
+    "recorded_before_use"
+  ],
+  "properties": {
+    "component_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license_id": {
+      "type": ["string", "null"],
+      "description": "Recognized OSS id, or null when recording failed (Requirement 11.2)."
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "intended_use_permitted": {
+      "type": "boolean"
+    },
+    "recorded_before_use": {
+      "type": "boolean"
+    },
+    "redistribution_restricted": {
+      "type": "boolean"
+    },
+    "restriction_type": {
+      "type": ["string", "null"],
+      "description": "The specific restriction type when redistribution is restricted (Requirement 11.6)."
+    }
+  }
+}

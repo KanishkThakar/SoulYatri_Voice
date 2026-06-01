@@ -1,0 +1,21 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "ConsentRecord",
+  "description": "A speaker-consent record (roadmap/models/runtime.py: ConsentRecord).",
+  "type": "object",
+  "required": ["speaker_id", "permitted_use_scope", "timestamp"],
+  "properties": {
+    "speaker_id": {
+      "type": "string",
+      "description": "Speaker identifier (Requirement 10.1)."
+    },
+    "permitted_use_scope": {
+      "type": "string",
+      "description": "Permitted-use scope (Requirement 10.1)."
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Consent timestamp as a float epoch value (Requirement 10.1)."
+    }
+  }
+}

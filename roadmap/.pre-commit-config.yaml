@@ -1,0 +1,69 @@
+# SoulYatri — roadmap package pre-commit hooks (scoped to roadmap/).
+#
+# This config is INTENTIONALLY SEPARATE from the repo-root .pre-commit-config.yaml
+# so the roadmap tooling can be linted / type-checked / tested in isolation without
+# touching (or being affected by) the broader foundation-package hooks.
+#
+# All hooks are CPU-only and MUST NOT trigger any GPU or model-training run — the
+# evaluation harness is fully mocked (Requirements 4.6, 12.7).
+#
+# What it does:
+#   * ruff        — lint the roadmap/ package (auto-fix)
+#   * ruff-format — check formatting of the roadmap/ package
+#   * mypy        — type-check roadmap/ (tolerant: ignores missing third-party stubs;
+#                   roadmap-scoped [tool.mypy] config is added by task 43.1)
+#   * pytest      — run the roadmap/tests suite with the Hypothesis "roadmap" profile
+#                   (>=100 examples) on push / manual stages
+#
+# How to run it (without installing the git hook, so it never clobbers the root config):
+#   pre-commit run --config roadmap/.pre-commit-config.yaml --all-files
+#   pre-commit run --config roadmap/.pre-commit-config.yaml --hook-stage manual roadmap-pytest
+#
+# To install it as the active hook for this checkout (optional):
+#   pre-commit install --config roadmap/.pre-commit-config.yaml
+minimum_pre_commit_version: "3.5.0"
+
+repos:
+  # ----------------------------------------------------------------------- #
+  # Ruff — lint + format, scoped to the roadmap/ package only.
+  # ----------------------------------------------------------------------- #
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        name: ruff (roadmap lint)
+        args: ["--fix"]
+        files: ^roadmap/
+      - id: ruff-format
+        name: ruff-format (roadmap)
+        files: ^roadmap/
+
+  # ----------------------------------------------------------------------- #
+  # Mypy — type checking scoped to roadmap/ source (tests excluded).
+  # Kept tolerant of missing stubs so the hook is usable before task 43.1
+  # wires a dedicated [tool.mypy] roadmap section into pyproject.toml.
+  # ----------------------------------------------------------------------- #
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy
+        name: mypy (roadmap)
+        files: ^roadmap/
+        exclude: ^roadmap/tests/
+        args: ["--ignore-missing-imports"]
+
+  # ----------------------------------------------------------------------- #
+  # Local / system hooks — project-scoped commands, no network or GPU needed.
+  # ----------------------------------------------------------------------- #
+  - repo: local
+    hooks:
+      # Run the roadmap property + structural + unit suite with the Hypothesis
+      # "roadmap" profile (>=100 examples). Mocked harness only — no GPU/training.
+      # Scoped to push / manual stages to keep per-commit latency low.
+      - id: roadmap-pytest
+        name: pytest (roadmap suite, Hypothesis roadmap profile)
+        entry: python -m pytest roadmap/tests -q --hypothesis-profile roadmap
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push, manual]

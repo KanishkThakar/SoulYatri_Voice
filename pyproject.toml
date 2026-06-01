@@ -14,6 +14,12 @@ dependencies = [
     "pydantic>=2.9.0",
 ]
 
+# Console-script entry points. The `roadmap` command runs the fully-mocked
+# roadmap planning tooling CLI (validate / select / gate-report / eval-report /
+# trace / coverage / render-roadmap) — no GPU/training run is ever invoked.
+[project.scripts]
+roadmap = "roadmap.cli:main"
+
 # The foundation (shared/contracts + scaffold) only needs pydantic. Heavy runtime
 # dependencies live in server/requirements.txt and are loaded lazily per-subsystem so
 # the foundation imports cleanly on a CPU-only machine with no model weights.
@@ -73,7 +79,15 @@ packages = [
     "training.labeling",
     "training.sft",
     "training.preference",
+    "roadmap",
+    "roadmap.models",
+    "roadmap.reports",
 ]
+
+# Ship the PEP 561 typing marker so consumers/type-checkers treat the roadmap
+# planning package as typed (Task 43.1).
+[tool.setuptools.package-data]
+roadmap = ["py.typed"]
 
 # ---------------------------------------------------------------------------
 # Ruff — lint + format
@@ -81,6 +95,10 @@ packages = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
+# Source roots for import classification. The roadmap/ planning package is an
+# explicit first-party source root so the roadmap lint gate (Task 43.1) targets
+# roadmap/ directly. The project root "." preserves existing foundation behavior.
+src = [".", "roadmap"]
 # Existing baseline code and generated client assets are excluded from new lint gates.
 extend-exclude = [
     "client",
@@ -101,6 +119,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # re-exports
 "tests/**" = ["B011"]
+# roadmap/ planning package — tests may use assert-style and re-exports freely.
+"roadmap/tests/**" = ["B011", "F401", "E402"]
+"roadmap/**/__init__.py" = ["F401"]
 
 # ---------------------------------------------------------------------------
 # Mypy — type checking (scoped to the foundation packages)
@@ -111,12 +132,28 @@ warn_unused_configs = true
 ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true
-# Scope type checking to the new foundation; existing server/ keeps its own conventions.
-files = ["shared", "tests"]
+# Scope type checking to the new foundation and the roadmap/ planning package;
+# existing server/ keeps its own conventions. The roadmap/ package ships a
+# py.typed marker (PEP 561) and its public dataclasses + decision-logic
+# functions are fully annotated (Task 43.1).
+files = ["shared", "tests", "roadmap"]
 
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_defs = false
+
+# roadmap/ planning package — pragmatic strictness on the typed public surface
+# without forcing full annotation of the structural/property test modules.
+[[tool.mypy.overrides]]
+module = "roadmap.*"
+disallow_untyped_defs = false
+check_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "roadmap.tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
 
 # ---------------------------------------------------------------------------
 # Pytest — discovery over tests/ and per-package tests/ and *_test dirs
@@ -135,6 +172,7 @@ testpaths = [
     "infra",
     "evals",
     "training",
+    "roadmap",
 ]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]

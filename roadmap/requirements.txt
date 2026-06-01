@@ -1,0 +1,15 @@
+# =============================================================================
+# SoulYatri speech-native voice roadmap — tooling & test dependencies
+# =============================================================================
+# Self-contained requirements for the planning/decision-logic tooling in the
+# roadmap/ package and its property-based + structural tests. Pure-Python only;
+# no GPU/model-training dependencies (out of scope per Requirements 4.6/12.4/12.5).
+
+# --- Serialization ---
+# JSON codecs use the stdlib ``json`` module; YAML codecs in
+# ``roadmap/serialization.py`` use PyYAML's safe loader/dumper.
+pyyaml>=6.0
+
+# --- Testing ---
+pytest>=8.0.0
+hypothesis>=6.100.0

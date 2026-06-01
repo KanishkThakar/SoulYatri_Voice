@@ -1,0 +1,28 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "SelectionOutcome",
+  "description": "The result of selecting the Speech-Native Core (roadmap/models/selection.py: SelectionOutcome).",
+  "type": "object",
+  "required": ["selected", "aggregates", "passing"],
+  "properties": {
+    "selected": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The selected model_id or the RETAIN_PHASE_1 sentinel."
+    },
+    "aggregates": {
+      "type": "object",
+      "description": "Mapping of model_id to its weighted aggregate score.",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "passing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "The model_id values meeting every per-criterion minimum."
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "Gate",
+  "description": "A Decision_Gate or Launch_Gate (roadmap/models/phases.py: Gate).",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "entry_criteria",
+    "exit_criteria",
+    "owner_role",
+    "fallback_action"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique gate identifier, e.g. 'G1'."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["decision", "launch"]
+    },
+    "entry_criteria": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gate_criterion"
+      }
+    },
+    "exit_criteria": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gate_criterion"
+      }
+    },
+    "owner_role": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exactly one named role responsible for the gate decision (Requirement 1.4)."
+    },
+    "fallback_action": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Action taken when exit criteria are not met (Requirement 1.5)."
+    }
+  },
+  "$defs": {
+    "gate_criterion": {
+      "type": "object",
+      "required": ["metric_name", "threshold", "operator"],
+      "properties": {
+        "metric_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["<=", "<", ">=", ">", "=="],
+          "description": "Comparison operator (Requirement 1.4)."
+        }
+      }
+    }
+  }
+}

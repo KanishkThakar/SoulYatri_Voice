@@ -1,0 +1,23 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "CandidateScores",
+  "description": "A Candidate_Model's per-criterion scores (roadmap/models/selection.py: CandidateScores).",
+  "type": "object",
+  "required": ["model_id", "revision", "scores"],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string"
+    },
+    "scores": {
+      "type": "object",
+      "description": "Mapping of selection-criterion name to a score in 0..100.",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  }
+}

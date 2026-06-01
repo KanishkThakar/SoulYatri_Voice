@@ -1,0 +1,305 @@
+{
+  "_schema": {
+    "description": "Regression cases: known input -> expected-output examples for the roadmap decision logic. Each category is an array of self-contained cases consumed by task 45.3 (roadmap/tests/test_regression.py). Expected values were verified by reasoning about the actual implementations (SELECTION_WEIGHTS/SELECTION_MINIMUMS, the gate operator + fail-closed rule, the distress label/confidence rule, and the Hindi/English token-ratio definition).",
+    "categories": {
+      "selection": {
+        "component": "roadmap.SelectionScorer (canonical SELECTION_WEIGHTS / SELECTION_MINIMUMS)",
+        "fields": {
+          "description": "human-readable case description",
+          "candidate_scores": "object mapping model_id -> {criterion: score 0..100}; insertion order defines the first-wins tie-break order",
+          "expected_selected": "the selected model_id, or 'RETAIN_PHASE_1' when no candidate clears every per-criterion minimum",
+          "expected_passing": "list of model_ids that meet every per-criterion minimum, in input order"
+        },
+        "notes": "A criterion absent from a candidate's scores is treated as 0.0 (fail-closed). aggregate = sum(score*weight)/100; selection is the highest-aggregate candidate among those that pass every minimum."
+      },
+      "gate_evaluation": {
+        "component": "roadmap.GateEvaluator with a clean LicensingRegister (no unresolved warning, nothing prohibiting)",
+        "fields": {
+          "description": "human-readable case description",
+          "criteria": "list of {metric_name, threshold, operator} used as the gate exit_criteria",
+          "measured": "object mapping metric_name -> measured value; a metric absent here is fail-closed",
+          "expected_overall_passed": "bool: true iff every criterion passes (register is clean)",
+          "expected_blocked": "bool: equals not(expected_overall_passed)"
+        }
+      },
+      "emotion": {
+        "component": "roadmap.EmotionPersonaController.select_conditioning",
+        "fields": {
+          "description": "human-readable case description",
+          "label": "discrete emotion tag or null (failed/unavailable extraction)",
+          "confidence": "confidence value 0.0..1.0",
+          "extraction_ok": "bool: whether per-turn extraction succeeded",
+          "expected_mode": "NEUTRAL | EMPATHETIC | STANDARD"
+        },
+        "notes": "NEUTRAL when extraction failed or label is null. EMPATHETIC when the label is a distress label (sad/angry/fear) with confidence >= 0.50 (inclusive). STANDARD otherwise. V/A/D do not affect the mode decision and default to 0.0 in the consuming test."
+      },
+      "hinglish_score": {
+        "component": "roadmap.HinglishDataEngine.score(input, output).within_tolerance",
+        "fields": {
+          "description": "human-readable case description",
+          "input": "code-switched input text",
+          "output": "system response text",
+          "expected_within_tolerance": "bool: true iff |output H/E ratio - input H/E ratio| <= 15 percentage points"
+        },
+        "notes": "H/E ratio = 100 * hindi / (hindi + english) over classifiable word tokens. A token is Hindi if it contains Devanagari or (casefolded) is in the engine's default Romanized->Devanagari mapping; a Latin word not in the mapping is English; other tokens are ignored. Text with no classifiable Hindi/English tokens has ratio 0.0."
+      }
+    }
+  },
+  "description": "Verified regression cases for the speech-native voice roadmap decision logic (selection, gate evaluation, emotion conditioning, Hinglish code-switch scoring).",
+
+  "selection": [
+    {
+      "description": "Single candidate scoring exactly at every per-criterion minimum -> it passes and is selected.",
+      "candidate_scores": {
+        "moshi": {
+          "streaming_latency": 60,
+          "hinglish_capability": 60,
+          "full_duplex": 50,
+          "license_permissiveness": 70,
+          "vram_footprint": 40,
+          "community_activity": 30
+        }
+      },
+      "expected_selected": "moshi",
+      "expected_passing": ["moshi"]
+    },
+    {
+      "description": "Single candidate below the license_permissiveness minimum (69 < 70) -> no candidate passes, retain Phase 1.",
+      "candidate_scores": {
+        "weak": {
+          "streaming_latency": 90,
+          "hinglish_capability": 90,
+          "full_duplex": 90,
+          "license_permissiveness": 69,
+          "vram_footprint": 90,
+          "community_activity": 90
+        }
+      },
+      "expected_selected": "RETAIN_PHASE_1",
+      "expected_passing": []
+    },
+    {
+      "description": "Two passing candidates -> the one with the higher weighted aggregate (alpha=90 vs beta=80) is selected.",
+      "candidate_scores": {
+        "alpha": {
+          "streaming_latency": 90,
+          "hinglish_capability": 90,
+          "full_duplex": 90,
+          "license_permissiveness": 90,
+          "vram_footprint": 90,
+          "community_activity": 90
+        },
+        "beta": {
+          "streaming_latency": 80,
+          "hinglish_capability": 80,
+          "full_duplex": 80,
+          "license_permissiveness": 80,
+          "vram_footprint": 80,
+          "community_activity": 80
+        }
+      },
+      "expected_selected": "alpha",
+      "expected_passing": ["alpha", "beta"]
+    },
+    {
+      "description": "Two passing candidates tied on aggregate (both 75) -> first-wins tie-break selects the first in input order.",
+      "candidate_scores": {
+        "first": {
+          "streaming_latency": 75,
+          "hinglish_capability": 75,
+          "full_duplex": 75,
+          "license_permissiveness": 75,
+          "vram_footprint": 75,
+          "community_activity": 75
+        },
+        "second": {
+          "streaming_latency": 75,
+          "hinglish_capability": 75,
+          "full_duplex": 75,
+          "license_permissiveness": 75,
+          "vram_footprint": 75,
+          "community_activity": 75
+        }
+      },
+      "expected_selected": "first",
+      "expected_passing": ["first", "second"]
+    },
+    {
+      "description": "A high-aggregate candidate that misses one minimum (community_activity=0 < 30) is NOT selected; a lower-aggregate passing candidate wins.",
+      "candidate_scores": {
+        "high_but_fails": {
+          "streaming_latency": 100,
+          "hinglish_capability": 100,
+          "full_duplex": 100,
+          "license_permissiveness": 100,
+          "vram_footprint": 100,
+          "community_activity": 0
+        },
+        "passing_lower": {
+          "streaming_latency": 70,
+          "hinglish_capability": 70,
+          "full_duplex": 70,
+          "license_permissiveness": 70,
+          "vram_footprint": 70,
+          "community_activity": 70
+        }
+      },
+      "expected_selected": "passing_lower",
+      "expected_passing": ["passing_lower"]
+    },
+    {
+      "description": "Candidate missing criteria -> missing scores are fail-closed (0.0), so it fails and Phase 1 is retained.",
+      "candidate_scores": {
+        "partial": {
+          "streaming_latency": 90,
+          "hinglish_capability": 90
+        }
+      },
+      "expected_selected": "RETAIN_PHASE_1",
+      "expected_passing": []
+    }
+  ],
+
+  "gate_evaluation": [
+    {
+      "description": "All criteria satisfied -> overall pass, not blocked.",
+      "criteria": [
+        {"metric_name": "latency_ms_p50", "threshold": 300.0, "operator": "<="},
+        {"metric_name": "hinglish_quality", "threshold": 80.0, "operator": ">="}
+      ],
+      "measured": {"latency_ms_p50": 250.0, "hinglish_quality": 85.0},
+      "expected_overall_passed": true,
+      "expected_blocked": false
+    },
+    {
+      "description": "One criterion fails (latency 350 > 300) -> overall fail, blocked.",
+      "criteria": [
+        {"metric_name": "latency_ms_p50", "threshold": 300.0, "operator": "<="},
+        {"metric_name": "hinglish_quality", "threshold": 80.0, "operator": ">="}
+      ],
+      "measured": {"latency_ms_p50": 350.0, "hinglish_quality": 85.0},
+      "expected_overall_passed": false,
+      "expected_blocked": true
+    },
+    {
+      "description": "A metric absent from measured values is fail-closed -> overall fail, blocked.",
+      "criteria": [
+        {"metric_name": "latency_ms_p50", "threshold": 300.0, "operator": "<="}
+      ],
+      "measured": {},
+      "expected_overall_passed": false,
+      "expected_blocked": true
+    },
+    {
+      "description": "Boundary: measured equals threshold under '<=' -> passes.",
+      "criteria": [
+        {"metric_name": "latency_ms_p50", "threshold": 300.0, "operator": "<="}
+      ],
+      "measured": {"latency_ms_p50": 300.0},
+      "expected_overall_passed": true,
+      "expected_blocked": false
+    },
+    {
+      "description": "Strict '>' with measured equal to threshold -> fails (50 > 50 is false).",
+      "criteria": [
+        {"metric_name": "score", "threshold": 50.0, "operator": ">"}
+      ],
+      "measured": {"score": 50.0},
+      "expected_overall_passed": false,
+      "expected_blocked": true
+    },
+    {
+      "description": "Equality '==' satisfied -> passes.",
+      "criteria": [
+        {"metric_name": "protocol_version", "threshold": 2.0, "operator": "=="}
+      ],
+      "measured": {"protocol_version": 2.0},
+      "expected_overall_passed": true,
+      "expected_blocked": false
+    }
+  ],
+
+  "emotion": [
+    {
+      "description": "Distress label (sad) at exactly the 0.50 confidence boundary -> EMPATHETIC (inclusive).",
+      "label": "sad",
+      "confidence": 0.50,
+      "extraction_ok": true,
+      "expected_mode": "EMPATHETIC"
+    },
+    {
+      "description": "Distress label (sad) just below the threshold (0.49) -> STANDARD.",
+      "label": "sad",
+      "confidence": 0.49,
+      "extraction_ok": true,
+      "expected_mode": "STANDARD"
+    },
+    {
+      "description": "Distress label (angry) well above threshold -> EMPATHETIC.",
+      "label": "angry",
+      "confidence": 0.80,
+      "extraction_ok": true,
+      "expected_mode": "EMPATHETIC"
+    },
+    {
+      "description": "Non-distress label (happy) at high confidence -> STANDARD (not a distress label).",
+      "label": "happy",
+      "confidence": 0.95,
+      "extraction_ok": true,
+      "expected_mode": "STANDARD"
+    },
+    {
+      "description": "Null label (extraction unavailable for label) -> NEUTRAL regardless of confidence.",
+      "label": null,
+      "confidence": 0.90,
+      "extraction_ok": true,
+      "expected_mode": "NEUTRAL"
+    },
+    {
+      "description": "Failed extraction (extraction_ok false) with a distress label -> NEUTRAL; the turn still continues.",
+      "label": "fear",
+      "confidence": 0.70,
+      "extraction_ok": false,
+      "expected_mode": "NEUTRAL"
+    }
+  ],
+
+  "hinglish_score": [
+    {
+      "description": "Pure English input and output (ratios 0.0 and 0.0) -> within tolerance.",
+      "input": "hello how are you",
+      "output": "i am fine thanks",
+      "expected_within_tolerance": true
+    },
+    {
+      "description": "Pure Hindi (recognized Romanized) input and output (ratios 100.0 and 100.0) -> within tolerance.",
+      "input": "namaste aap kaise ho",
+      "output": "main theek hoon",
+      "expected_within_tolerance": true
+    },
+    {
+      "description": "Balanced 50/50 code-switch in both input and output (ratios 50.0 and 50.0) -> within tolerance.",
+      "input": "main fine hoon today",
+      "output": "aap good ho friend",
+      "expected_within_tolerance": true
+    },
+    {
+      "description": "Input all Hindi (100.0) vs output all English (0.0) -> 100 pp gap, outside tolerance.",
+      "input": "namaste aap kaise ho",
+      "output": "hello how are you",
+      "expected_within_tolerance": false
+    },
+    {
+      "description": "Input ratio 50.0 vs output ratio 60.0 -> 10 pp gap, within tolerance.",
+      "input": "main hello hoon world",
+      "output": "main aap hoon hello world",
+      "expected_within_tolerance": true
+    },
+    {
+      "description": "Input ratio 50.0 vs output ratio 75.0 -> 25 pp gap, outside tolerance.",
+      "input": "main hello hoon world",
+      "output": "main aap hoon hello",
+      "expected_within_tolerance": false
+    }
+  ]
+}

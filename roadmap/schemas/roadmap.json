@@ -1,0 +1,202 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "Roadmap",
+  "description": "The top-level roadmap planning aggregate (roadmap/roadmap_model.py: Roadmap).",
+  "type": "object",
+  "required": ["phases", "track_labels", "gates", "conflicts", "scope_statements"],
+  "properties": {
+    "phases": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/phase"
+      },
+      "description": "At least two ordered phases (Requirement 1.1)."
+    },
+    "track_labels": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Mapping of track name to its label, e.g. {LEAN: primary, AMBITIOUS: optional}."
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/gate"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflict_entry"
+      }
+    },
+    "scope_statements": {
+      "$ref": "#/$defs/scope_statements"
+    }
+  },
+  "$defs": {
+    "gate_criterion": {
+      "type": "object",
+      "required": ["metric_name", "threshold", "operator"],
+      "properties": {
+        "metric_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["<=", "<", ">=", ">", "=="]
+        }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "required": [
+        "ordinal",
+        "id",
+        "track",
+        "title",
+        "is_speech_native",
+        "guide_sections",
+        "compute_min_gpu_class",
+        "compute_min_vram_gb"
+      ],
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "track": {
+          "type": "string",
+          "enum": ["LEAN", "AMBITIOUS"]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "is_speech_native": {
+          "type": "boolean"
+        },
+        "guide_sections": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compute_min_gpu_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compute_min_vram_gb": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "entry_criteria",
+        "exit_criteria",
+        "owner_role",
+        "fallback_action"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["decision", "launch"]
+        },
+        "entry_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gate_criterion"
+          }
+        },
+        "exit_criteria": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gate_criterion"
+          }
+        },
+        "owner_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fallback_action": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "conflict_entry": {
+      "type": "object",
+      "required": ["topic", "superseding_decision", "rationale"],
+      "properties": {
+        "topic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "superseding_decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conflicting_document": {
+          "type": "string"
+        }
+      }
+    },
+    "scope_statements": {
+      "type": "object",
+      "required": [
+        "authoritative_supersedes_pdfs",
+        "references_ai_training_docs",
+        "excludes_from_scratch_pretraining",
+        "excludes_gpu_training_execution",
+        "planning_artifact_only"
+      ],
+      "properties": {
+        "authoritative_supersedes_pdfs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "references_ai_training_docs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "excludes_from_scratch_pretraining": {
+          "type": "string",
+          "minLength": 1
+        },
+        "excludes_gpu_training_execution": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planning_artifact_only": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

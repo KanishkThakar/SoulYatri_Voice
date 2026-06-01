@@ -1,0 +1,59 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "Phase",
+  "description": "An ordered phase in the roadmap (roadmap/models/phases.py: Phase).",
+  "type": "object",
+  "required": [
+    "ordinal",
+    "id",
+    "track",
+    "title",
+    "is_speech_native",
+    "guide_sections",
+    "compute_min_gpu_class",
+    "compute_min_vram_gb"
+  ],
+  "properties": {
+    "ordinal": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Unique, contiguous position starting at 1 (Requirement 1.1)."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique phase identifier, e.g. 'P2-core-select'."
+    },
+    "track": {
+      "type": "string",
+      "enum": ["LEAN", "AMBITIOUS"],
+      "description": "The track this phase belongs to."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "is_speech_native": {
+      "type": "boolean"
+    },
+    "guide_sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "At least one implementation-guide section heading (Requirement 1.6)."
+    },
+    "compute_min_gpu_class": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Minimum GPU class to execute the phase (Requirement 9.1)."
+    },
+    "compute_min_vram_gb": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Minimum VRAM in GB to execute the phase (Requirement 9.1)."
+    }
+  }
+}

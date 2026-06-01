@@ -1,0 +1,55 @@
+{
+  "schema_version": "draft-2020-12-style",
+  "title": "HarnessRun",
+  "description": "A single mocked evaluation record (roadmap/models/runtime.py: HarnessRun).",
+  "type": "object",
+  "required": [
+    "model_id",
+    "revision",
+    "metric_scores",
+    "license_compat",
+    "hardware"
+  ],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string"
+    },
+    "metric_scores": {
+      "type": "object",
+      "description": "At least latency_ms_p50, codeswitch_quality, expressiveness.",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "license_compat": {
+      "type": "string",
+      "enum": ["compatible", "restricted", "prohibited"]
+    },
+    "hardware": {
+      "type": "object",
+      "required": ["gpu_class", "vram_gb"],
+      "properties": {
+        "gpu_class": {
+          "type": "string"
+        },
+        "vram_gb": {
+          "type": "number"
+        }
+      }
+    },
+    "excluded": {
+      "type": "boolean"
+    },
+    "exclusion_category": {
+      "type": ["string", "null"],
+      "description": "missing_weights | license | hardware, or null."
+    },
+    "exclusion_reason": {
+      "type": ["string", "null"]
+    }
+  }
+}

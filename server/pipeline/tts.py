@@ -38,15 +38,57 @@ def _ensure_ffmpeg_available() -> bool:
     ffmpeg = shutil.which("ffmpeg")
     ffprobe = shutil.which("ffprobe")
 
+    # Highest priority: binaries bundled in the repo at server/bin. This is the
+    # most reliable location because it is readable regardless of which user
+    # runs the server (e.g. Admin vs the installing user) and needs no PATH.
+    if not ffmpeg or not ffprobe:
+        bundled = os.path.join(os.path.dirname(os.path.dirname(__file__)), "bin")
+        cand_ffmpeg = os.path.join(bundled, "ffmpeg.exe")
+        cand_ffprobe = os.path.join(bundled, "ffprobe.exe")
+        if os.path.isfile(cand_ffmpeg) and os.path.isfile(cand_ffprobe):
+            ffmpeg = cand_ffmpeg
+            ffprobe = cand_ffprobe
+            os.environ["PATH"] = bundled + os.pathsep + os.environ.get("PATH", "")
+
+    # Next: explicit override via env var (FFMPEG_BIN points at the directory
+    # containing ffmpeg.exe/ffprobe.exe).
+    if not ffmpeg or not ffprobe:
+        override = os.environ.get("FFMPEG_BIN", "").strip().strip('"')
+        if override and os.path.isdir(override):
+            cand_ffmpeg = os.path.join(override, "ffmpeg.exe")
+            cand_ffprobe = os.path.join(override, "ffprobe.exe")
+            if os.path.isfile(cand_ffmpeg) and os.path.isfile(cand_ffprobe):
+                ffmpeg = cand_ffmpeg
+                ffprobe = cand_ffprobe
+                os.environ["PATH"] = override + os.pathsep + os.environ.get("PATH", "")
+
+    # Prefer project-local binaries (server/bin) so the app works regardless of
+    # PATH or which Windows user launched it. tts.py lives at server/pipeline/,
+    # so server/bin is two levels up.
+    local_bin = os.path.join(os.path.dirname(os.path.dirname(__file__)), "bin")
+    local_ffmpeg = os.path.join(local_bin, "ffmpeg.exe")
+    local_ffprobe = os.path.join(local_bin, "ffprobe.exe")
+    if os.path.isfile(local_ffmpeg) and os.path.isfile(local_ffprobe):
+        ffmpeg, ffprobe = local_ffmpeg, local_ffprobe
+        os.environ["PATH"] = local_bin + os.pathsep + os.environ.get("PATH", "")
+
     # Fall back to common install locations if not on PATH.
     if not ffmpeg or not ffprobe:
         search_globs = [
+            # Current user's winget install.
             os.path.expandvars(
                 r"%LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg*\**\bin"
             ),
             os.path.expandvars(r"%LOCALAPPDATA%\Programs\ffmpeg*\bin"),
+            # Any user profile's winget install (server may run as a different
+            # user than the one that installed ffmpeg, e.g. elevated/Admin).
+            r"C:\Users\*\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg*\**\bin",
+            r"C:\Users\*\AppData\Local\Programs\ffmpeg*\bin",
+            # Machine-wide / package-manager locations.
+            r"C:\ProgramData\chocolatey\bin",
             r"C:\ffmpeg\bin",
-            r"C:\Program Files\ffmpeg\bin",
+            r"C:\Program Files\ffmpeg*\bin",
+            r"C:\Program Files\ffmpeg*\**\bin",
         ]
         for pattern in search_globs:
             for bin_dir in glob.glob(pattern, recursive=True):

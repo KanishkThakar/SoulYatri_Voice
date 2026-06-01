@@ -1,0 +1,205 @@
+# SoulYatri Speech-Native Voice Roadmap — structured source data
+# =============================================================================
+# This file is the structured, machine-readable encoding of the roadmap's
+# phase / track / gate / conflict / scope structure. It is loaded by
+# ``roadmap.roadmap_io.load_roadmap`` (Task 29.1), which deserializes it into
+# the ``Roadmap`` aggregate (``roadmap/roadmap_model.py``), enforcing the
+# Task 5 phase-structure invariants on construction and then validating the
+# result against the Task 28 JSON Schema (``roadmap/schemas/roadmap.json``).
+#
+# Shape (mirrors ``serialization.to_dict(Roadmap)`` exactly — the top-level keys
+# and every nested field name match the dataclass fields, so the document is
+# consumable by ``serialization.from_dict(Roadmap, <parsed-yaml>)``; no extra
+# keys are permitted because ``from_dict`` rejects unknown fields):
+#
+#   phases:            list of Phase mappings, in ascending-ordinal order.
+#     - ordinal:                int    (unique, contiguous, starts at 1)
+#       id:                     str    (unique phase id, e.g. "P2-core-select")
+#       track:                  str    ("LEAN" | "AMBITIOUS")
+#       title:                  str
+#       is_speech_native:       bool
+#       guide_sections:         list[str]  (>= 1 implementation-guide heading)
+#       compute_min_gpu_class:  str
+#       compute_min_vram_gb:    number
+#   track_labels:      mapping of track name -> label string.
+#   gates:             list of Gate mappings (G1 + the two launch gates).
+#     - id / kind ("decision"|"launch") / owner_role / fallback_action
+#       entry_criteria, exit_criteria: list of {metric_name, threshold, operator}
+#         where operator is one of "<=", "<", ">=", ">", "==".
+#   conflicts:         list of ConflictEntry mappings (the conflict register).
+#     - topic / superseding_decision / rationale / conflicting_document
+#   scope_statements:  the five explicit scope-statement strings.
+#
+# Canonical values are sourced from roadmap/ROADMAP.md sections 1-4 and 9.
+# =============================================================================
+
+phases:
+  - ordinal: 1
+    id: "P1-baseline"
+    track: "LEAN"
+    title: "Phase_1_Pipeline (existing classic cascade)"
+    is_speech_native: false
+    guide_sections:
+      - "10. The actual implementation order → Phase 1 — production baseline"
+    compute_min_gpu_class: "T4-16GB"
+    compute_min_vram_gb: 16.0
+
+  - ordinal: 2
+    id: "P2-core-select"
+    track: "LEAN"
+    title: "Speech-Native Core selection + Evaluation Harness"
+    is_speech_native: false
+    guide_sections:
+      - "3. Recommended open-source stack"
+      - "9B — Evaluation harness"
+    compute_min_gpu_class: "L4-24GB"
+    compute_min_vram_gb: 24.0
+
+  - ordinal: 3
+    id: "P3-integrate"
+    track: "LEAN"
+    title: "Concurrent integration (core + Phase 1 fallback)"
+    is_speech_native: false
+    guide_sections:
+      - "10 → Phase 2 — move to speech-native core"
+      - "5. Final runtime architecture in detail"
+    compute_min_gpu_class: "L4-24GB"
+    compute_min_vram_gb: 24.0
+
+  - ordinal: 4
+    id: "P4-moat-duplex"
+    track: "LEAN"
+    title: "Hinglish moat + Emotion/Persona (FiLM) + Full-duplex + Latency"
+    is_speech_native: false
+    guide_sections:
+      - "10 → Phase 3 — emotion and persona / Phase 4 — filler latency masking / Phase 5 — full duplex"
+      - "13. Latency engineering"
+    compute_min_gpu_class: "A100-40GB"
+    compute_min_vram_gb: 40.0
+
+  - ordinal: 5
+    id: "P5-safety-gate"
+    track: "LEAN"
+    title: "Safety/consent/watermark + LEAN Demo Launch Gate"
+    is_speech_native: false
+    guide_sections:
+      - "11.6 Safety subsystem"
+      - "17. Launch criteria"
+    compute_min_gpu_class: "L4-24GB"
+    compute_min_vram_gb: 24.0
+
+  - ordinal: 6
+    id: "P6-custom"
+    track: "AMBITIOUS"
+    title: "Custom codec/tokenizer + alignment (DPO/GRPO)"
+    is_speech_native: false
+    guide_sections:
+      - "8. Fine-tuning strategy"
+      - "16. Fine-tuning recipes"
+    compute_min_gpu_class: "A100-80GB"
+    compute_min_vram_gb: 80.0
+
+  - ordinal: 7
+    id: "P7-diff-gate"
+    track: "AMBITIOUS"
+    title: "AMBITIOUS Differentiation Launch Gate (final speech-native platform)"
+    is_speech_native: true
+    guide_sections:
+      - "17. Launch criteria"
+      - "20. Final note on product strategy"
+    compute_min_gpu_class: "A100-80GB"
+    compute_min_vram_gb: 80.0
+
+track_labels:
+  LEAN: "primary"
+  AMBITIOUS: "optional"
+
+gates:
+  # Decision_Gate G1 — the single LEAN -> AMBITIOUS decision gate (Section 3).
+  - id: "G1"
+    kind: "decision"
+    owner_role: "ML Lead"
+    fallback_action: "remain on LEAN_Track"
+    entry_criteria:
+      - metric_name: "lean_demo_launch_gate_passed"
+        threshold: 1.0
+        operator: "=="
+      - metric_name: "lean_demo_stable_days"
+        threshold: 14.0
+        operator: ">="
+    exit_criteria:
+      - metric_name: "measured_competitive_gap_pct"
+        threshold: 10.0
+        operator: ">="
+      - metric_name: "ambitious_budget_justification_approved"
+        threshold: 1.0
+        operator: "=="
+      - metric_name: "ambitious_compute_vram_gb_confirmed"
+        threshold: 80.0
+        operator: ">="
+
+  # LEAN Demo Launch_Gate — gates the P5-safety-gate LEAN demo (Section 8.2).
+  - id: "LEAN-DEMO"
+    kind: "launch"
+    owner_role: "Release Manager"
+    fallback_action: "withhold the demo-ready declaration, mark the release blocked, and record a remediation path for each failing threshold"
+    entry_criteria: []
+    exit_criteria:
+      - metric_name: "latency_ms_p50"
+        threshold: 300.0
+        operator: "<="
+      - metric_name: "hinglish_codeswitch_quality"
+        threshold: 80.0
+        operator: ">="
+      - metric_name: "emotional_expressiveness"
+        threshold: 70.0
+        operator: ">="
+
+  # AMBITIOUS Differentiation Launch_Gate — gates P7-diff-gate (Section 8.3).
+  - id: "AMBITIOUS-DIFF"
+    kind: "launch"
+    owner_role: "Release Manager"
+    fallback_action: "mark the differentiation release blocked and record a remediation path for each unmet benchmark threshold or competitive target"
+    entry_criteria: []
+    exit_criteria:
+      - metric_name: "voicebench"
+        threshold: 85.0
+        operator: ">="
+      - metric_name: "emergenttts_eval"
+        threshold: 80.0
+        operator: ">="
+      - metric_name: "seed_tts_eval"
+        threshold: 80.0
+        operator: ">="
+      - metric_name: "mushra"
+        threshold: 80.0
+        operator: ">="
+      - metric_name: "speech_arena"
+        threshold: 1200.0
+        operator: ">="
+      - metric_name: "hinglish_codeswitch"
+        threshold: 90.0
+        operator: ">="
+
+conflicts:
+  - topic: "Build custom model from forked weights up front"
+    conflicting_document: "SOULYATRI_MASTER_BIBLE.pdf"
+    superseding_decision: "Adopt an existing open-source Speech-Native Core first; defer custom work to the AMBITIOUS_Track behind G1."
+    rationale: "2026 open-source full-duplex models are adoptable now; a custom build is high cost/risk and not justified until evals show a gap."
+
+  - topic: "Reject all from-scratch / fine-tuning work for the demo"
+    conflicting_document: "VOX_OMEGA_FINAL_VERIFIED_60_DAY_PLAN.pdf"
+    superseding_decision: "Allow lightweight adaptation (LoRA / adapters) on Hinglish data when the core scores below the code-switch pass threshold."
+    rationale: "The moat (Hinglish) may need targeted adaptation even in the LEAN_Track; this is not large-scale training."
+
+  - topic: "Custom neural codec is a prerequisite"
+    conflicting_document: "SOULYATRI_VOICE_AI_FINAL_BUILD_BIBLE.pdf"
+    superseding_decision: "Use kyutai/mimi as the primary codec; a custom codec is AMBITIOUS-only."
+    rationale: "Mimi is production-ready and streaming-optimized; a custom codec is a differentiation bet, not a baseline need."
+
+scope_statements:
+  authoritative_supersedes_pdfs: "This roadmap is the authoritative build plan for all build-sequencing decisions and supersedes every strategy PDF in the docs/ directory."
+  references_ai_training_docs: "This roadmap references the .kiro/specs/ai-training-docs/ spec as the documentation/knowledge-base workstream and does not restate its documentation-generation requirements."
+  excludes_from_scratch_pretraining: "From-scratch foundation-model pretraining is out of scope for this roadmap."
+  excludes_gpu_training_execution: "Executing GPU-based model-training runs is out of scope for this spec; training execution is downstream work the roadmap plans but does not perform."
+  planning_artifact_only: "The sole deliverable of this spec is a planning artifact, not executable model weights or a training run."
