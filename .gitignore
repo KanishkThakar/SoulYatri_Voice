@@ -12,6 +12,9 @@ build/
 venv/
 .venv/
 *.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # Node
 node_modules/
@@ -24,6 +27,9 @@ out/
 .idea/
 *.swp
 *.swo
+
+# Kiro MCP settings (contains API tokens)
+.kiro/settings/mcp.json
 
 # OS
 .DS_Store

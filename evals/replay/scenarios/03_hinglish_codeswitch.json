@@ -1,0 +1,26 @@
+{
+  "scenario_id": "hinglish_codeswitch",
+  "category": "hinglish",
+  "language": "hinglish",
+  "description": "Romanized Hinglish code-switching between Hindi and English.",
+  "turns": [
+    {
+      "transcript": "Yaar mujhe kal ka plan banana hai, can you help?",
+      "language": "hinglish",
+      "expected_route": "full_stack",
+      "expected_intent": "request",
+      "expected_emotion": "friendly",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 275, "first_token_ms": 185, "turn_end_detection_delay_ms": 105}
+    },
+    {
+      "transcript": "Thik hai, but please thoda jaldi karna.",
+      "language": "hinglish",
+      "expected_route": "full_stack",
+      "expected_intent": "instruction",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 290, "first_token_ms": 195, "turn_end_detection_delay_ms": 115}
+    }
+  ]
+}

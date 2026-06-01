@@ -1,0 +1,26 @@
+{
+  "scenario_id": "hindi_basic",
+  "category": "hindi",
+  "language": "hi",
+  "description": "Devanagari Hindi conversation; full-stack routing.",
+  "turns": [
+    {
+      "transcript": "नमस्ते, आप कैसे हैं?",
+      "language": "hi",
+      "expected_route": "full_stack",
+      "expected_intent": "greeting",
+      "expected_emotion": "warm",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 270, "first_token_ms": 180, "turn_end_detection_delay_ms": 110}
+    },
+    {
+      "transcript": "मुझे कल के लिए एक रिमाइंडर सेट करना है।",
+      "language": "hi",
+      "expected_route": "full_stack",
+      "expected_intent": "request",
+      "expected_emotion": "neutral",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 285, "first_token_ms": 190, "turn_end_detection_delay_ms": 120}
+    }
+  ]
+}

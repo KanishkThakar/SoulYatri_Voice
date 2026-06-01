@@ -1,0 +1,154 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "soulyatri"
+version = "0.1.0"
+description = "SoulYatri — open-source, speech-native, low-latency, full-duplex, emotional Hindi/English/Hinglish conversational voice AI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "SoulYatri" }]
+dependencies = [
+    "pydantic>=2.9.0",
+]
+
+# The foundation (shared/contracts + scaffold) only needs pydantic. Heavy runtime
+# dependencies live in server/requirements.txt and are loaded lazily per-subsystem so
+# the foundation imports cleanly on a CPU-only machine with no model weights.
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "pytest>=8.0.0",
+    "pre-commit>=3.8.0",
+]
+
+[tool.setuptools]
+# Explicit package list keeps the foundation importable without packaging the whole repo.
+packages = [
+    "shared",
+    "edge",
+    "edge.webrtc_gateway",
+    "edge.turn_detection",
+    "edge.emotion",
+    "edge.speaker",
+    "edge.barge_in",
+    "edge.session",
+    "speech",
+    "speech.codec",
+    "speech.tokenizer",
+    "speech.moshi_runtime",
+    "speech.decoder",
+    "speech.persona",
+    "auxiliary",
+    "auxiliary.text_brain",
+    "auxiliary.stt",
+    "auxiliary.tool_router",
+    "auxiliary.fallback",
+    "memory",
+    "memory.redis",
+    "memory.postgres",
+    "memory.qdrant",
+    "memory.summarizer",
+    "safety",
+    "safety.moderation",
+    "safety.voice_policy",
+    "safety.watermark",
+    "infra",
+    "infra.livekit",
+    "infra.docker",
+    "infra.deploy",
+    "infra.monitoring",
+    "infra.scaling",
+    "evals",
+    "evals.replay",
+    "evals.latency",
+    "evals.audio",
+    "evals.hinglish",
+    "evals.emotion",
+    "training",
+    "training.data_engine",
+    "training.labeling",
+    "training.sft",
+    "training.preference",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff — lint + format
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+# Existing baseline code and generated client assets are excluded from new lint gates.
+extend-exclude = [
+    "client",
+    ".next",
+    "node_modules",
+    "models",
+    "runs",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+ignore = [
+    "E501",  # line length handled by formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # re-exports
+"tests/**" = ["B011"]
+
+# ---------------------------------------------------------------------------
+# Mypy — type checking (scoped to the foundation packages)
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+warn_unused_configs = true
+ignore_missing_imports = true
+namespace_packages = true
+explicit_package_bases = true
+# Scope type checking to the new foundation; existing server/ keeps its own conventions.
+files = ["shared", "tests"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+# ---------------------------------------------------------------------------
+# Pytest — discovery over tests/ and per-package tests/ and *_test dirs
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q"
+testpaths = [
+    "tests",
+    "shared",
+    "edge",
+    "speech",
+    "auxiliary",
+    "memory",
+    "safety",
+    "infra",
+    "evals",
+    "training",
+]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Per-package tests can live in <pkg>/tests/ or be named <name>_test.py and will be
+# discovered automatically under the testpaths above.
+norecursedirs = [
+    "client",
+    ".next",
+    "node_modules",
+    "models",
+    "runs",
+    ".git",
+    "build",
+    "dist",
+    "*.egg-info",
+]

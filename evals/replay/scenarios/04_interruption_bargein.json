@@ -1,0 +1,25 @@
+{
+  "scenario_id": "interruption_bargein",
+  "category": "interruptions",
+  "language": "en",
+  "description": "User barges in while the assistant is speaking; clean stop + recover.",
+  "turns": [
+    {
+      "transcript": "Tell me a long story about the mountains.",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "request",
+      "is_trivial": false,
+      "timing": {"time_to_first_audible_ms": 250, "first_token_ms": 160, "turn_end_detection_delay_ms": 95}
+    },
+    {
+      "transcript": "Wait, stop, actually never mind.",
+      "language": "en",
+      "expected_route": "full_stack",
+      "expected_intent": "interrupt",
+      "is_interruption": true,
+      "is_trivial": false,
+      "timing": {"interruption_recovery_ms": 160, "turn_end_detection_delay_ms": 80}
+    }
+  ]
+}

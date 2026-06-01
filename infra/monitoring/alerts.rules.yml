@@ -1,0 +1,53 @@
+# =============================================================================
+# SoulYatri — Prometheus alerting rules (final_use.md §15A / Phase 16 monitoring)
+# =============================================================================
+# Thresholds intentionally mirror infra/deploy/release_policy.yaml so the canary
+# rollback evaluator and the live alerts agree on what "unhealthy" means.
+# Config only — does not require a running Prometheus/Alertmanager.
+
+groups:
+  - name: soulyatri-latency
+    rules:
+      # p95 end-to-end latency > 0.45s (== release_policy p95_ttfb_ms: 450).
+      - alert: HighE2ELatencyP95
+        expr: histogram_quantile(0.95, sum(rate(soulyatri_pipeline_e2e_latency_seconds_bucket[5m])) by (le)) > 0.45
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "p95 end-to-end latency above 450ms"
+          description: "Speech-end -> first audible p95 has breached the canary rollback budget."
+
+      # LLM time-to-first-token p95 > 1s.
+      - alert: HighLLMTTFTP95
+        expr: histogram_quantile(0.95, sum(rate(soulyatri_llm_ttft_seconds_bucket[5m])) by (le)) > 1.0
+        for: 5m
+        labels:
+          severity: warn
+        annotations:
+          summary: "LLM TTFT p95 above 1s"
+          description: "Auxiliary text-brain latency is high; check Ollama backend."
+
+  - name: soulyatri-errors
+    rules:
+      # Error rate > 1% over 5m (== release_policy error_rate_pct: 1.0).
+      - alert: HighErrorRate
+        expr: sum(rate(soulyatri_errors_total[5m])) / clamp_min(sum(rate(soulyatri_llm_requests_total[5m])), 1) > 0.01
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "Error rate above 1%"
+          description: "Pipeline error rate breached the canary rollback budget."
+
+  - name: soulyatri-saturation
+    rules:
+      # Active sessions sustained near capacity (operator tunes the literal).
+      - alert: SessionPoolSaturated
+        expr: soulyatri_active_sessions > 0 and soulyatri_active_streams > 0
+        for: 10m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Session pool sustained high"
+          description: "Check the SessionScheduler queue depth and consider scaling workers."

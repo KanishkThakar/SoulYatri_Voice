@@ -1,0 +1,26 @@
+{
+  "description": "Emotion-agreement fixtures: label + continuous V/A/D (final_use.md §12 / §9A).",
+  "samples": [
+    {
+      "intended_label": "warm",
+      "produced_label": "friendly",
+      "intended": {"valence": 0.6, "arousal": 0.3, "dominance": 0.5, "warmth": 0.8},
+      "produced": {"valence": 0.55, "arousal": 0.28, "dominance": 0.5, "warmth": 0.78},
+      "blend": 0.5
+    },
+    {
+      "intended_label": "distress",
+      "produced_label": "overwhelmed",
+      "intended": {"valence": -0.6, "arousal": 0.5, "dominance": -0.4},
+      "produced": {"valence": -0.55, "arousal": 0.45, "dominance": -0.35},
+      "blend": 0.5
+    },
+    {
+      "intended_label": "neutral",
+      "produced_label": "neutral",
+      "intended": {"valence": 0.0, "arousal": 0.0, "dominance": 0.0},
+      "produced": {"valence": 0.05, "arousal": -0.02, "dominance": 0.0},
+      "blend": 0.5
+    }
+  ]
+}

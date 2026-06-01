@@ -1,0 +1,25 @@
+{
+  "description": "Hinglish code-switch + transliteration fixtures (final_use.md §12).",
+  "samples": [
+    {
+      "text": "Yaar mujhe kal ka plan banana hai, can you help?",
+      "reference_translit": "Yaar mujhe kal ka plan banana hai, can you help?",
+      "expect_code_switch": true
+    },
+    {
+      "text": "Thik hai but please thoda jaldi karna",
+      "reference_translit": "Theek hai but please thoda jaldi karna",
+      "expect_code_switch": true
+    },
+    {
+      "text": "Let us schedule the meeting tomorrow morning",
+      "reference_translit": "Let us schedule the meeting tomorrow morning",
+      "expect_code_switch": false
+    },
+    {
+      "text": "नमस्ते, please mujhe aaj ka schedule batao",
+      "reference_translit": null,
+      "expect_code_switch": true
+    }
+  ]
+}

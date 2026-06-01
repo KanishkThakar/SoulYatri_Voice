@@ -1,0 +1,35 @@
+{
+  "scenario_id": "short_confirmations",
+  "category": "short_confirmations",
+  "description": "Trivial short acknowledgements that should route to cached filler.",
+  "language": "en",
+  "turns": [
+    {
+      "transcript": "Okay.",
+      "language": "en",
+      "expected_route": "cached_filler",
+      "expected_intent": "ack",
+      "expected_emotion": "neutral",
+      "is_trivial": true,
+      "timing": {"time_to_first_audible_ms": 70, "first_token_ms": 40, "turn_end_detection_delay_ms": 60}
+    },
+    {
+      "transcript": "Haan thik hai.",
+      "language": "hinglish",
+      "expected_route": "cached_filler",
+      "expected_intent": "ack",
+      "expected_emotion": "neutral",
+      "is_trivial": true,
+      "timing": {"time_to_first_audible_ms": 80, "first_token_ms": 45, "turn_end_detection_delay_ms": 65}
+    },
+    {
+      "transcript": "Got it, thanks.",
+      "language": "en",
+      "expected_route": "cached_filler",
+      "expected_intent": "ack",
+      "expected_emotion": "friendly",
+      "is_trivial": true,
+      "timing": {"time_to_first_audible_ms": 75, "first_token_ms": 42, "turn_end_detection_delay_ms": 58}
+    }
+  ]
+}

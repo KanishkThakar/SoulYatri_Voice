@@ -1,0 +1,40 @@
+# =============================================================================
+# SoulYatri — Prometheus scrape configuration (final_use.md §15A / Phase 16 monitoring)
+# =============================================================================
+# Validated by infra/tests/test_config_files.py (yaml.safe_load + required keys).
+# This is config only; it does NOT require a running Prometheus. The targets below
+# match the services in infra/docker/docker-compose.full.yml.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    project: soulyatri
+
+# Alerting rules live alongside this file (dashboards_and_alerts.md documents them).
+rule_files:
+  - alerts.rules.yml
+
+scrape_configs:
+  # The SoulYatri FastAPI server exposes /metrics (server/main.py).
+  - job_name: soulyatri-server
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - server:8000
+        labels:
+          component: voice-pipeline
+
+  # Prometheus self-monitoring.
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+
+  # LiveKit server metrics (when enabled in livekit config).
+  - job_name: livekit
+    static_configs:
+      - targets:
+          - livekit:6789
+        labels:
+          component: transport
