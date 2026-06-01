@@ -214,9 +214,12 @@ async def audio_websocket(websocket: WebSocket, session_id: str):
         except Exception as e:
             logger.error("ws_turn_metadata_error", error=str(e), session_id=sid)
 
-    agent.set_audio_callback(on_audio_response)
-    agent.set_transcript_callback(on_transcript)
-    agent.set_turn_metadata_callback(on_turn_metadata)
+    agent.register_callbacks(
+        session_id,
+        on_audio=on_audio_response,
+        on_transcript=on_transcript,
+        on_turn_metadata=on_turn_metadata,
+    )
 
     try:
         while True:

@@ -89,10 +89,12 @@ class VoiceAgent:
         self._initialized = False
         self._processing_lock = asyncio.Lock()
 
-        # Callbacks — set by the server
-        self._on_audio_response: Optional[Callable] = None
-        self._on_transcript: Optional[Callable] = None
-        self._on_turn_metadata: Optional[Callable] = None
+        # Per-session callbacks — registered by the server for each
+        # WebSocket connection. Keyed by session_id so concurrent sessions
+        # route their audio/transcripts/metadata to the correct socket.
+        self._audio_callbacks: dict[str, Callable] = {}
+        self._transcript_callbacks: dict[str, Callable] = {}
+        self._turn_metadata_callbacks: dict[str, Callable] = {}
 
     async def initialize(self) -> None:
         """Initialize all pipeline components. Call once at startup."""
@@ -136,31 +138,38 @@ class VoiceAgent:
         self._initialized = False
         logger.info("agent_shutdown_complete")
 
-    # --- Callback setters ---
+    # --- Callback setters (per-session) ---
 
-    def set_audio_callback(self, callback: Callable) -> None:
-        """Set callback for audio responses.
+    def register_callbacks(
+        self,
+        session_id: str,
+        on_audio: Optional[Callable] = None,
+        on_transcript: Optional[Callable] = None,
+        on_turn_metadata: Optional[Callable] = None,
+    ) -> None:
+        """Register per-session callbacks for a WebSocket connection.
 
-        Args:
-            callback: async function(session_id, audio_bytes, sample_rate)
-        """
-        self._on_audio_response = callback
-
-    def set_transcript_callback(self, callback: Callable) -> None:
-        """Set callback for transcript updates.
-
-        Args:
-            callback: async function(session_id, role, text)
-        """
-        self._on_transcript = callback
-
-    def set_turn_metadata_callback(self, callback: Callable) -> None:
-        """Set callback for turn metadata (emotion, speaker, etc).
+        Each connection registers its own callbacks keyed by session_id so
+        that concurrent sessions never overwrite one another's response sink.
 
         Args:
-            callback: async function(session_id, metadata_dict)
+            session_id: Unique session/participant identifier.
+            on_audio: async function(session_id, audio_bytes, sample_rate, metadata)
+            on_transcript: async function(session_id, role, text)
+            on_turn_metadata: async function(session_id, metadata_dict)
         """
-        self._on_turn_metadata = callback
+        if on_audio is not None:
+            self._audio_callbacks[session_id] = on_audio
+        if on_transcript is not None:
+            self._transcript_callbacks[session_id] = on_transcript
+        if on_turn_metadata is not None:
+            self._turn_metadata_callbacks[session_id] = on_turn_metadata
+
+    def unregister_callbacks(self, session_id: str) -> None:
+        """Remove a session's callbacks (call on disconnect)."""
+        self._audio_callbacks.pop(session_id, None)
+        self._transcript_callbacks.pop(session_id, None)
+        self._turn_metadata_callbacks.pop(session_id, None)
 
     # --- Turn machine management ---
 
@@ -285,6 +294,11 @@ class VoiceAgent:
         """
         pipeline_start = time.perf_counter()
 
+        # Resolve per-session callbacks once (avoids cross-session leakage)
+        on_audio = self._audio_callbacks.get(session.session_id)
+        on_transcript = self._transcript_callbacks.get(session.session_id)
+        on_turn_metadata = self._turn_metadata_callbacks.get(session.session_id)
+
         # --- State transitions for segment detection ---
         if turn_machine.state == TurnState.IDLE:
             turn_machine.on_speech_start()
@@ -306,8 +320,8 @@ class VoiceAgent:
                 return
 
             # Notify transcript callback
-            if self._on_transcript:
-                await self._on_transcript(
+            if on_transcript:
+                await on_transcript(
                     session.session_id, "user", transcription.text
                 )
 
@@ -374,8 +388,8 @@ class VoiceAgent:
 
                 if routing.filler_phrase and routing.filler_phrase.audio:
                     self._barge_in_detector.set_agent_speaking(True)
-                    if self._on_audio_response:
-                        await self._on_audio_response(
+                    if on_audio:
+                        await on_audio(
                             session.session_id,
                             routing.filler_phrase.audio,
                             routing.filler_phrase.audio_sample_rate,
@@ -386,8 +400,8 @@ class VoiceAgent:
                             },
                         )
                     self._barge_in_detector.set_agent_speaking(False)
-                    if self._on_transcript:
-                        await self._on_transcript(
+                    if on_transcript:
+                        await on_transcript(
                             session.session_id,
                             "assistant",
                             routing.filler_phrase.text,
@@ -418,8 +432,8 @@ class VoiceAgent:
                     turn_machine.on_pipeline_needed()
 
                     self._barge_in_detector.set_agent_speaking(True)
-                    if self._on_audio_response:
-                        await self._on_audio_response(
+                    if on_audio:
+                        await on_audio(
                             session.session_id,
                             routing.filler_phrase.audio,
                             routing.filler_phrase.audio_sample_rate,
@@ -454,8 +468,8 @@ class VoiceAgent:
                     turn_machine.on_error()
                     return
 
-                if self._on_transcript:
-                    await self._on_transcript(
+                if on_transcript:
+                    await on_transcript(
                         session.session_id, "assistant", llm_response.text
                     )
 
@@ -485,8 +499,8 @@ class VoiceAgent:
                 turn_machine.on_response_ready()
                 self._barge_in_detector.set_agent_speaking(True)
 
-                if tts_result.audio and self._on_audio_response:
-                    await self._on_audio_response(
+                if tts_result.audio and on_audio:
+                    await on_audio(
                         session.session_id,
                         tts_result.audio,
                         tts_result.sample_rate,
@@ -538,8 +552,8 @@ class VoiceAgent:
                     session.add_turn_metadata(metadata.to_dict())
 
                     # Send metadata to client
-                    if self._on_turn_metadata and metadata:
-                        await self._on_turn_metadata(
+                    if on_turn_metadata and metadata:
+                        await on_turn_metadata(
                             session.session_id, metadata.to_dict()
                         )
 
@@ -577,6 +591,9 @@ class VoiceAgent:
 
         # Clear feature caches
         self._feature_extractor.clear_session_cache(session_id)
+
+        # Remove per-session callbacks
+        self.unregister_callbacks(session_id)
 
         # Clean up session
         self._session_manager.remove_session(session_id)
